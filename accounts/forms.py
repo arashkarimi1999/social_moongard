@@ -2,6 +2,7 @@ from typing import Any
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from .models import Profile
 
 
 class UserRegisterationForm(forms.Form):
@@ -61,4 +62,12 @@ class UserLoginForm(forms.Form):
             attrs={"class":"form-control"}
         )
     )
-    
+
+
+class EditUserForm(forms.ModelForm):
+    email = forms.EmailField()
+
+    class Meta:
+        model = Profile
+        fields = ('age', 'bio')
+

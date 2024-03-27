@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .forms import UserRegisterationForm, UserLoginForm
+from .forms import UserRegisterationForm, UserLoginForm, EditUserForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -138,4 +138,23 @@ class UserUnfollowView(LoginRequiredMixin, View):
             messages.error(request, "You are not folloing this user.", "danger")
         return redirect("accounts:user_profile", user.id)
 
+
+class EditUserView(LoginRequiredMixin, View):
+    form_class = EditUserForm
+
+    def get(self, request):
+        form = self.form_class(
+            instance=request.user.profile,
+            initial={"email": request.user.email}
+        )
+        return render(request, 'accounts/edit_profile.html', {"form": form})
+
+    def post(self, request):
+        form = self.form_class(request.POST, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            request.user.email = form.cleaned_data["email"]
+            request.user.save()
+            messages.success(request, "Profile Edited successfully", "success")
+        return redirect("accounts:user_profile", request.user.id)
 
